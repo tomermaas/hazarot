@@ -1,5 +1,6 @@
 import importlib.util
 import pathlib
+import sys
 import pytest
 
 
@@ -10,6 +11,8 @@ def _load_substitutions_module():
         raise FileNotFoundError(f"Could not find substitutions.py at {mod_path}")
     spec = importlib.util.spec_from_file_location("substitutions_module", mod_path)
     module = importlib.util.module_from_spec(spec)
+    # IMPORTANT: register in sys.modules so dataclasses (and others) can resolve cls.__module__
+    sys.modules[spec.name] = module
     assert spec.loader is not None
     spec.loader.exec_module(module)
     return module
